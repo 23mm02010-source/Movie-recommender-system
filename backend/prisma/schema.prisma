@@ -1,0 +1,76 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String     // bcrypt hashed, never plain text
+  createdAt DateTime   @default(now())
+
+  ratings    Rating[]
+  watchlist  WatchlistItem[]
+}
+
+model Movie {
+  id            Int      @id                  // TMDB movie id (reuse directly, no need to regenerate)
+  title         String
+  overview      String?  @db.Text
+  posterPath    String?                        // TMDB poster path, e.g. "/abc123.jpg"
+  genres        String?                        // comma-separated for simplicity, e.g. "Action,Adventure"
+  releaseDate   String?
+  voteAverage   Float?
+
+  ratings       Rating[]
+  watchlistedBy WatchlistItem[]
+  similarTo     MovieSimilarity[] @relation("SourceMovie")
+  similarFrom   MovieSimilarity[] @relation("TargetMovie")
+}
+
+// Precomputed top-N similar movies, exported once from your Python cosine similarity model.
+model MovieSimilarity {
+  id            Int   @id @default(autoincrement())
+  sourceMovieId Int
+  targetMovieId Int
+  score         Float                          // cosine similarity score, 0 to 1
+  rank          Int                             // 1 = most similar, 2 = next, etc.
+
+  sourceMovie   Movie @relation("SourceMovie", fields: [sourceMovieId], references: [id])
+  targetMovie   Movie @relation("TargetMovie", fields: [targetMovieId], references: [id])
+
+  @@unique([sourceMovieId, targetMovieId])
+  @@index([sourceMovieId, rank])
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  score     Int                                 // 1 to 5
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  movie     Movie    @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])                    // one rating per user per movie
+}
+
+model WatchlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  addedAt   DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  movie     Movie    @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])                    // no duplicate watchlist entries
+}
