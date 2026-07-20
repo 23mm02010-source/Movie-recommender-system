@@ -645,3 +645,131 @@ a {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+/* ---- Responsive: mobile & small tablets ---- */
+@media (max-width: 768px) {
+  .page {
+    padding: 0 16px 32px;
+  }
+
+  .navbar {
+    padding: 16px;
+    margin: 0 -16px 8px;
+  }
+
+  .navbar h1 {
+    font-size: 18px;
+  }
+
+  .navbar-links {
+    gap: 14px;
+  }
+
+  .navbar-links a,
+  .navbar-links button {
+    font-size: 12.5px;
+  }
+
+  .hero {
+    height: 320px;
+    margin: 0 -16px 24px;
+  }
+
+  .hero-content {
+    padding: 0 16px 24px;
+  }
+
+  .hero-content h2 {
+    font-size: 26px;
+  }
+
+  .hero-content p {
+    font-size: 13px;
+    -webkit-line-clamp: 2;
+  }
+
+  .search-input {
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+  }
+
+  .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+  }
+
+  .detail-hero {
+    margin: 0 -16px 0;
+    padding: 24px 16px 32px;
+  }
+
+  .detail-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .detail-poster {
+    width: 100%;
+    min-width: 0;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+
+  .detail-info h1 {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .detail-genres,
+  .detail-meta {
+    justify-content: center;
+  }
+
+  .detail-overview {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .star-rating,
+  .action-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .section-title-wrap {
+    margin-top: 32px;
+  }
+
+  .auth-card {
+    width: 90vw;
+    max-width: 360px;
+    padding: 28px 24px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 420px) {
+  .movie-grid,
+  .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .movie-card-title {
+    font-size: 12.5px;
+  }
+}
