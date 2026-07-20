@@ -4,93 +4,109 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/client";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function Login() {
-  const [isSignup, setIsSignup] = useState(false); // toggles between Login and Signup forms
+  const [isSignup, setIsSignup] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault(); // stops the page from refreshing on form submit
-    setError("");
-    setLoading(true);
+  function validate() {
+    const errors = {};
 
+    if (isSignup && name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      errors.email = "Enter a valid email address";
+    }
+
+    if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setServerError("");
+
+    if (!validate()) return;
+
+    setLoading(true);
     try {
       const endpoint = isSignup ? "/auth/signup" : "/auth/login";
       const payload = isSignup ? { name, email, password } : { email, password };
 
       const response = await api.post(endpoint, payload);
 
-      // Save the token so the axios interceptor can attach it to future requests
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      navigate("/movies"); // redirect to the movie browsing page after login
+      navigate("/movies");
     } catch (err) {
       const message = err.response?.data?.error || "Something went wrong";
-      setError(message);
+      setServerError(message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "80px auto", fontFamily: "sans-serif" }}>
+    <div className="auth-card">
       <h2>{isSignup ? "Sign Up" : "Log In"}</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         {isSignup && (
-          <div style={{ marginBottom: 12 }}>
+          <>
             <input
               type="text"
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
-              style={{ width: "100%", padding: 8 }}
+              className="input-field"
             />
-          </div>
+            {fieldErrors.name && <p className="field-error">{fieldErrors.name}</p>}
+          </>
         )}
 
-        <div style={{ marginBottom: 12 }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="input-field"
+        />
+        {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
 
-        <div style={{ marginBottom: 12 }}>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="input-field"
+        />
+        {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {serverError && <p className="field-error">{serverError}</p>}
 
-        <button type="submit" disabled={loading} style={{ width: "100%", padding: 10 }}>
+        <button type="submit" disabled={loading} className="btn" style={{ width: "100%", marginTop: 8 }}>
           {loading ? "Please wait..." : isSignup ? "Sign Up" : "Log In"}
         </button>
       </form>
 
-      <p style={{ marginTop: 16, textAlign: "center" }}>
+      <p style={{ marginTop: 20, textAlign: "center", color: "#b3b3b3" }}>
         {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
-        <button
-          onClick={() => setIsSignup(!isSignup)}
-          style={{ background: "none", border: "none", color: "blue", cursor: "pointer" }}
-        >
+        <button onClick={() => setIsSignup(!isSignup)} className="auth-toggle-btn">
           {isSignup ? "Log In" : "Sign Up"}
         </button>
       </p>

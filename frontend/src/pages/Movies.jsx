@@ -12,8 +12,6 @@ function Movies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Runs whenever `search` changes (and once on first load).
-  // We fetch fresh results from the backend each time the search term changes.
   useEffect(() => {
     async function fetchMovies() {
       setLoading(true);
@@ -30,8 +28,6 @@ function Movies() {
       }
     }
 
-    // Small delay so we don't fire an API call on every single keystroke -
-    // wait 400ms after the user stops typing before searching.
     const timeoutId = setTimeout(fetchMovies, 400);
     return () => clearTimeout(timeoutId);
   }, [search]);
@@ -43,11 +39,11 @@ function Movies() {
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h1>Movie Recommender</h1>
-        <div>
-          <Link to="/watchlist" style={{ marginRight: 16 }}>My Watchlist</Link>
+    <div className="page">
+      <div className="navbar">
+        <h1>MovieMatch</h1>
+        <div className="navbar-links">
+          <Link to="/watchlist">My Watchlist</Link>
           <button onClick={handleLogout}>Log Out</button>
         </div>
       </div>
@@ -57,33 +53,20 @@ function Movies() {
         placeholder="Search movies..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 20, fontSize: 16 }}
+        className="search-input"
       />
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p style={{ color: "#b3b3b3" }}>Loading...</p>}
+      {error && <p className="field-error">{error}</p>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-          gap: 16,
-        }}
-      >
+      <div className="movie-grid">
         {movies.map((movie) => (
-          <Link
-            key={movie.id}
-            to={`/movies/${movie.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <div>
-              <img
-                src={movie.posterPath ? `${POSTER_BASE_URL}${movie.posterPath}` : "https://via.placeholder.com/342x513?text=No+Poster"}
-                alt={movie.title}
-                style={{ width: "100%", borderRadius: 8 }}
-              />
-              <p style={{ fontSize: 14, marginTop: 6 }}>{movie.title}</p>
-            </div>
+          <Link key={movie.id} to={`/movies/${movie.id}`} className="movie-card">
+            <img
+              src={movie.posterPath ? `${POSTER_BASE_URL}${movie.posterPath}` : "https://via.placeholder.com/342x513?text=No+Poster"}
+              alt={movie.title}
+            />
+            <p>{movie.title}</p>
           </Link>
         ))}
       </div>
